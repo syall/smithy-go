@@ -39,7 +39,9 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.neighbor.Walker;
+import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.shapes.IntEnumShape;
+import software.amazon.smithy.model.shapes.ModelSerializer;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -88,6 +90,13 @@ final class CodegenVisitor extends ShapeVisitor.Default<Void> {
         fileManifest = context.getFileManifest();
 
         Model resolvedModel = context.getModel();
+
+        Node modelNode = ModelSerializer.builder().build().serialize(resolvedModel);
+        Model roundTripModelToTest = Model.assembler()
+                .addDocumentNode(modelNode)
+                .assemble()
+                .unwrap();
+        resolvedModel = roundTripModelToTest;
 
         var modelTransformer = ModelTransformer.create();
 
